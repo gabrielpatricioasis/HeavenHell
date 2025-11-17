@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7464061377934093974}
   - component: {fileID: 1275568983495013018}
   - component: {fileID: 4144603822111019855}
+  - component: {fileID: -9070913953524585786}
   m_Layer: 0
   m_Name: Monolith_Placeholder_Taller
   m_TagString: Untagged
@@ -111,3 +112,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-9070913953524585786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3635362865301074050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f5758db3b3d7f4a8c147f9dd0297f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractableMonolith
+  materialHeaven: {fileID: 2100000, guid: ad34f47c4966ee647bce96892c9d4e5c, type: 2}
+  materialHell: {fileID: 2100000, guid: 39961ee0aa5ac2d41ac462b57c29b50f, type: 2}
+  growthScaleFactor: 1.2
+  shrinkScaleFactor: 0.8
