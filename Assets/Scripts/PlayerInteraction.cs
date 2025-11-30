@@ -40,9 +40,9 @@ public class PlayerInteraction : MonoBehaviour
         HandleTriggerHold();
     }
 
-    public void UpdateLogIntParameters(WorldState newState)
+    public void UpdateLogIntParameters(WorldManager.WorldState newState)
     {
-        if (newState == WorldState.Heaven)
+        if (newState == WorldManager.WorldState.Heaven)
         {
             // The Creator (Heaven)
             currentSpeedMultiplier = 3.5f;

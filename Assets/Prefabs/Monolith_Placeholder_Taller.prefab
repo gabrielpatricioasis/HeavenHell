@@ -125,8 +125,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16f5758db3b3d7f4a8c147f9dd0297f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractableMonolith
-  materialHeaven: {fileID: 2100000, guid: ad34f47c4966ee647bce96892c9d4e5c, type: 2}
+  materialHeaven: {fileID: 2100000, guid: cf3da56f55dc78845aa9ee532679ca9a, type: 2}
   materialHell: {fileID: 2100000, guid: 39961ee0aa5ac2d41ac462b57c29b50f, type: 2}
+  heavenClip: {fileID: 0}
+  hellClip: {fileID: 0}
   growthScaleFactor: 1.2
   shrinkScaleFactor: 0.8
 --- !u!54 &3508034049548725957

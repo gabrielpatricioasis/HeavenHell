@@ -1,19 +1,26 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // <-- ESSENTIAL for scene management
+using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
 {
-    // Public method to load a scene by its string name
-    public void LoadSceneByName(string sceneName)
+    // 1. Keeps track of the choice (True = Heaven, False = Hell)
+    public static bool isHeavenSelected = true;
+
+    // 2. The exact name of your game scene
+    // MAKE SURE THIS MATCHES YOUR SCENE FILE EXACTLY!
+    public string gameSceneName = "Abstract_Garden"; 
+
+    // Link this to the HEAVEN button
+    public void LoadHeavenMode()
     {
-        // Check if the scene name is not empty
-        if (!string.IsNullOrEmpty(sceneName))
-        {
-            SceneManager.LoadScene(sceneName);
-        }
-        else
-        {
-            Debug.LogError("Scene name is empty! Cannot load scene.");
-        }
+        isHeavenSelected = true;
+        SceneManager.LoadScene(gameSceneName);
+    }
+
+    // Link this to the HELL button
+    public void LoadHellMode()
+    {
+        isHeavenSelected = false;
+        SceneManager.LoadScene(gameSceneName);
     }
 }

@@ -12,9 +12,12 @@ EditorBuildSettings:
     path: Assets/Scenes/Start Screen.unity
     guid: 6f4cd7ccea4d6904eaf032653c59be60
   - enabled: 1
+    path: Assets/Scenes/Abstract_Garden.unity
+    guid: 331dcd597086cbe488af6cc4b121747e
+  - enabled: 0
     path: Assets/Scenes/Abstract_Garden_Test_Heaven.unity
     guid: e119e22f2c1a9f04e975679e7487faf5
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Abstract_Garden_Test_Hell.unity
     guid: 9d99ca4a219623842b6e42e762765328
   m_configObjects:

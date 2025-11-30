@@ -33,7 +33,7 @@ public class InteractableEnergyStream : MonoBehaviour
     // The player's script calls this function when the trigger hold BEGINS.
     public void StartTriggerHold()
     {
-        if (WorldManager.currentState == WorldState.Heaven)
+        if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
         {
             Harmonize();
         }

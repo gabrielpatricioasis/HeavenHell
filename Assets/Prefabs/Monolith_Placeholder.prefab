@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6766045505902206325}
   - component: {fileID: 6295690986822142227}
   - component: {fileID: 7884828448442131344}
+  - component: {fileID: 3220152062248246961}
   m_Layer: 0
   m_Name: Monolith_Placeholder
   m_TagString: Untagged
@@ -139,3 +140,21 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &3220152062248246961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648059893739523673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f5758db3b3d7f4a8c147f9dd0297f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractableMonolith
+  materialHeaven: {fileID: 2100000, guid: cf3da56f55dc78845aa9ee532679ca9a, type: 2}
+  materialHell: {fileID: 2100000, guid: 39961ee0aa5ac2d41ac462b57c29b50f, type: 2}
+  heavenClip: {fileID: 0}
+  hellClip: {fileID: 0}
+  growthScaleFactor: 1.2
+  shrinkScaleFactor: 0.8

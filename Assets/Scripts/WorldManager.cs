@@ -1,65 +1,67 @@
 using UnityEngine;
 
-// An "enum" is a clean way to define a list of possible states.
-public enum WorldState { Heaven, Hell }
-
 public class WorldManager : MonoBehaviour
 {
-    // This is our main state variable. We make it "public static" so that any other script
-    // in the project can easily ask, "Hey, what state are we in?" without needing a direct link.
-    public static WorldState currentState;
+    // --- FIX: ENUM MOVED INSIDE THE CLASS ---
+    public enum WorldState { Heaven, Hell }
+    // ----------------------------------------
 
-    // --- ASSETS TO SWAP ---
-    // In the Unity Editor, we will drag the different assets for each state into these slots.
+    // Singleton Instance
+    public static WorldManager Instance;
+
+    // Your main state variable
+    // Note: I removed 'static' here so it works better with the Inspector, 
+    // but kept 'Instance' static so you can access it.
+    public WorldState currentState;
+
+    [Header("Assets to Swap")]
     public Material skyboxHeaven;
     public Material skyboxHell;
-    // We could also add references here for Post-Processing profiles, music tracks, etc.
 
+    [Header("Physics Settings")]
+    public float heavenGravity = -4.0f; 
+    public float hellGravity = -20.0f;  
 
-    void Start()
+    void Awake()
     {
-        // When the experience begins, let's start in a neutral or heavenly state.
-        SetState(WorldState.Heaven);
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+        // Read choice from SceneLoader
+        if (SceneLoader.isHeavenSelected)
+        {
+            SetState(WorldState.Heaven);
+        }
+        else
+        {
+            SetState(WorldState.Hell);
+        }
     }
 
     void Update()
     {
-        // This is a simple test "switch" to change the state for debugging purposes.
-        // When we press the Spacebar...
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // ...we flip to the other state.
-            if (currentState == WorldState.Heaven)
-            {
-                SetState(WorldState.Hell);
-            }
-            else
-            {
-                SetState(WorldState.Heaven);
-            }
+            if (currentState == WorldState.Heaven) SetState(WorldState.Hell);
+            else SetState(WorldState.Heaven);
         }
     }
 
-    // This is the core function that changes everything in the world.
-    void SetState(WorldState newState)
+    public void SetState(WorldState newState)
     {
         currentState = newState;
 
         if (currentState == WorldState.Heaven)
         {
-            // --- HEAVEN STATE LOGIC ---
-            // Change the skybox to the "Heaven" version.
-            RenderSettings.skybox = skyboxHeaven;
-            // Later, we would also call functions here to change the music, lighting, post-processing, etc.
-            Debug.Log("World state changed to: HEAVEN");
+            if (skyboxHeaven != null) RenderSettings.skybox = skyboxHeaven;
+            Physics.gravity = new Vector3(0, heavenGravity, 0);
+            Debug.Log("World Set to: HEAVEN");
         }
-        else // If the new state is Hell
+        else 
         {
-            // --- HELL STATE LOGIC ---
-            // Change the skybox to the "Hell" version.
-            RenderSettings.skybox = skyboxHell;
-            // Later, we would add the logic for Hell's music, post-processing, etc.
-            Debug.Log("World state changed to: HELL");
+            if (skyboxHell != null) RenderSettings.skybox = skyboxHell;
+            Physics.gravity = new Vector3(0, hellGravity, 0);
+            Debug.Log("World Set to: HELL");
         }
     }
 }

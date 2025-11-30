@@ -2,35 +2,56 @@ using UnityEngine;
 
 public class InteractableMonolith : MonoBehaviour
 {
-    // --- ASSETS TO SWAP ---
-    // In the Unity Editor (on the prefab), we'll drag the materials for each state.
+    [Header("Visual Settings")]
     public Material materialHeaven;
     public Material materialHell;
 
+    [Header("Audio Settings")] // NEW: Audio Clips from your Design Doc
+    public AudioClip heavenClip;
+    public AudioClip hellClip;
+
     [Header("Behavior Settings")]
-    public float growthScaleFactor = 1.2f; // How much it grows each time in Heaven.
-    public float shrinkScaleFactor = 0.8f; // How much it shrinks each time in Hell.
+    public float growthScaleFactor = 1.2f;
+    public float shrinkScaleFactor = 0.8f;
 
     private Renderer myRenderer;
+    private AudioSource audioSource; // NEW: To play the sound
     private Vector3 originalScale;
 
     void Start()
     {
-        // It's efficient to get and store these components at the start.
         myRenderer = GetComponent<Renderer>();
         originalScale = transform.localScale;
+
+        // --- NEW: SETUP AUDIO ---
+        audioSource = GetComponent<AudioSource>();
+        // If the prefab doesn't have an AudioSource, add one automatically
+        if (audioSource == null) 
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.spatialBlend = 1.0f; // Make it 3D sound
+        }
+
+        // --- NEW: SET INITIAL LOOK ---
+        // Check the WorldManager immediately to see if we loaded into Heaven or Hell
+        if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
+        {
+            if (myRenderer != null) myRenderer.material = materialHeaven;
+        }
+        else
+        {
+            if (myRenderer != null) myRenderer.material = materialHell;
+        }
     }
 
-    // This is the main public function that the PLAYER's interaction script will call.
-    // This script doesn't need to know *how* it was pushed, only that it *was* pushed.
     public void ReceivePush()
     {
-        // This script asks the WorldManager what the current state is.
-        if (WorldManager.currentState == WorldState.Heaven)
+        // Check the state again (in case it changed)
+        if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
         {
             Grow();
         }
-        else // If the state is Hell
+        else
         {
             Shatter();
         }
@@ -38,19 +59,29 @@ public class InteractableMonolith : MonoBehaviour
 
     void Grow()
     {
-        // Make the object bigger and apply the Heaven material.
         transform.localScale *= growthScaleFactor;
         myRenderer.material = materialHeaven;
-        Debug.Log("Monolith is Growing.");
-        // We would trigger the "growth" sound effect and the swelling haptic feedback here.
+        
+        // --- NEW: PLAY SOUND ---
+        if (heavenClip != null) audioSource.PlayOneShot(heavenClip);
+        
+        Debug.Log("Monolith Growing (Heaven)");
     }
 
     void Shatter()
     {
-        // Make the object smaller and apply the Hell material.
         transform.localScale *= shrinkScaleFactor;
         myRenderer.material = materialHell;
-        Debug.Log("Monolith is Shattering.");
-        // We would trigger the "shatter" sound effect and the jarring haptic feedback here.
+
+        // --- NEW: PLAY SOUND ---
+        if (hellClip != null) audioSource.PlayOneShot(hellClip);
+
+        Debug.Log("Monolith Shattering (Hell)");
+    }
+    
+    // Optional Polish: Slowly return to original size so you can push it again
+    void Update()
+    {
+        transform.localScale = Vector3.Lerp(transform.localScale, originalScale, Time.deltaTime * 0.5f);
     }
 }
