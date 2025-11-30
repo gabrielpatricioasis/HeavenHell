@@ -130,7 +130,7 @@ MonoBehaviour:
   heavenClip: {fileID: 0}
   hellClip: {fileID: 0}
   growthScaleFactor: 1.2
-  shrinkScaleFactor: 0.8
+  shatterEffectPrefab: {fileID: 2054026474248026324, guid: 5acac129286a643909fd7ed4666db9ea, type: 3}
 --- !u!54 &3508034049548725957
 Rigidbody:
   m_ObjectHideFlags: 0

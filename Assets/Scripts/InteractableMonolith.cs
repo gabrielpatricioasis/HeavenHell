@@ -18,6 +18,10 @@ public class InteractableMonolith : MonoBehaviour
     private AudioSource audioSource; // NEW: To play the sound
     private Vector3 originalScale;
 
+	 // --- NEW: A slot for our custom shatter effect ---
+    public GameObject shatterEffectPrefab;
+	private bool hasBeenInteractedWith = false;
+
     void Start()
     {
         myRenderer = GetComponent<Renderer>();
@@ -68,6 +72,7 @@ public class InteractableMonolith : MonoBehaviour
         Debug.Log("Monolith Growing (Heaven)");
     }
 
+    // --- THIS IS THE NEW SHATTER FUNCTION ---
     void Shatter()
     {
         transform.localScale *= shrinkScaleFactor;
