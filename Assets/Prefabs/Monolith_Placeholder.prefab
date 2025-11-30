@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 6766045505902206325}
   - component: {fileID: 6295690986822142227}
   - component: {fileID: 7884828448442131344}
+  - component: {fileID: 8499424280344902744}
+  - component: {fileID: -2077495519711825431}
   m_Layer: 0
   m_Name: Monolith_Placeholder
   m_TagString: Untagged
@@ -139,3 +141,58 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &8499424280344902744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648059893739523673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88c01c208fe74764a83a739f6c71136a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SBS.ME.MeshExploder
+  explodeNOW: 0
+  recalculteNormals: 1
+  recalculateTangents: 0
+  recalculateBounds: 0
+  createGameObjects: 0
+  probabilityOfCreatingAnObject: 1
+  colliderAttached: 1
+  useNormalsAsExplosionDirection: 0
+  explosionOrigin: 0
+  ExplosionOffset: {x: 0, y: 0, z: 0}
+  normalizeDirection: 1
+  explosionInitSpeed: 1
+  gravity: {x: 0, y: 0, z: 0}
+  friction: 0.99
+  doubleSided: 1
+  flipSideDistance: 0.001
+  explosionTime: 1
+  destroyObjectAfterExplosion: 1
+  onExplosionStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onPartsCreated:
+    m_PersistentCalls:
+      m_Calls: []
+  onExplosionFinished:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &-2077495519711825431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648059893739523673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f5758db3b3d7f4a8c147f9dd0297f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractableMonolith
+  materialHeaven: {fileID: 0}
+  materialHell: {fileID: 0}
+  growthScaleFactor: 1.2
+  shatterEffectPrefab: {fileID: 2054026474248026324, guid: 5acac129286a643909fd7ed4666db9ea, type: 3}

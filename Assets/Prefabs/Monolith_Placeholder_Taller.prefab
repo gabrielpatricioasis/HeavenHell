@@ -128,7 +128,7 @@ MonoBehaviour:
   materialHeaven: {fileID: 2100000, guid: ad34f47c4966ee647bce96892c9d4e5c, type: 2}
   materialHell: {fileID: 2100000, guid: 39961ee0aa5ac2d41ac462b57c29b50f, type: 2}
   growthScaleFactor: 1.2
-  shrinkScaleFactor: 0.8
+  shatterEffectPrefab: {fileID: 2054026474248026324, guid: 5acac129286a643909fd7ed4666db9ea, type: 3}
 --- !u!54 &3508034049548725957
 Rigidbody:
   m_ObjectHideFlags: 0
