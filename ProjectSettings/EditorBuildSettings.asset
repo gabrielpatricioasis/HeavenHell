@@ -8,6 +8,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Start Screen.unity
+    guid: 6f4cd7ccea4d6904eaf032653c59be60
+  - enabled: 1
+    path: Assets/Scenes/Abstract_Garden_Test_Heaven.unity
+    guid: e119e22f2c1a9f04e975679e7487faf5
+  - enabled: 1
+    path: Assets/Scenes/Abstract_Garden_Test_Hell.unity
+    guid: 9d99ca4a219623842b6e42e762765328
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: d34b00806319e4279a49ae81c5334d2c, type: 2}
