@@ -569,7 +569,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleMaterialSwap
   materialHeaven: {fileID: 2100000, guid: 8b7dd0809c7c6498789fa32a61eaa6cb, type: 2}
-  materialHell: {fileID: -876546973899608171, guid: 759943eb71e116e4bbf51aae175ba2a7, type: 3}
+  materialHell: {fileID: 2100000, guid: 842136f4129c2c54badde4451476f4fa, type: 2}
 --- !u!1 &415641352
 GameObject:
   m_ObjectHideFlags: 0
@@ -1105,6 +1105,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1158182666}
   - component: {fileID: 1158182665}
+  - component: {fileID: 1158182667}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -1224,6 +1225,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1158182667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158182664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc8a8c4863f92c340bf24bdd3e27cf3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  ambientSource: {fileID: 1158182665}
+  heavenAmbient: {fileID: 8300000, guid: e089a9b3cbec5d448894f28f286fc068, type: 3}
+  hellAmbient: {fileID: 8300000, guid: be7a6e6fbb78e3c48b3f9202ead2e689, type: 3}
 --- !u!1001 &1297161573
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2118,7 +2134,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldManager
   currentState: 0
   skyboxHeaven: {fileID: 2100000, guid: 8b7dd0809c7c6498789fa32a61eaa6cb, type: 2}
-  skyboxHell: {fileID: 2100000, guid: 69e10e886d52d20478f9ed5424126be8, type: 2}
+  skyboxHell: {fileID: 2100000, guid: 041cafd794164ac46b691af7461fc22f, type: 2}
   heavenGravity: -4
   hellGravity: -20
 --- !u!4 &2125982043

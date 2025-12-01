@@ -69,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a5f3265eb027f0e41af7b62f064343df, type: 2}
+  - {fileID: 2100000, guid: 63a7a44a03b04434b941e895fcb5ac68, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -158,3 +158,4 @@ MonoBehaviour:
   hellClip: {fileID: 0}
   growthScaleFactor: 1.2
   shrinkScaleFactor: 0.8
+  shatterEffectPrefab: {fileID: 0}

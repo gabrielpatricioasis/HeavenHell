@@ -51,6 +51,11 @@ public class WorldManager : MonoBehaviour
     {
         currentState = newState;
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.ChangeAmbient(newState);
+        }
+
         if (currentState == WorldState.Heaven)
         {
             if (skyboxHeaven != null) RenderSettings.skybox = skyboxHeaven;
