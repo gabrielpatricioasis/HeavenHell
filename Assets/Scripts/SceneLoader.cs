@@ -3,24 +3,27 @@ using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
 {
-    // 1. Keeps track of the choice (True = Heaven, False = Hell)
     public static bool isHeavenSelected = true;
+    public string gameSceneName = "Abstract_Garden";
+    
+    // --- NEW: Name of your menu scene ---
+    public string menuSceneName = "Start Screen"; 
 
-    // 2. The exact name of your game scene
-    // MAKE SURE THIS MATCHES YOUR SCENE FILE EXACTLY!
-    public string gameSceneName = "Abstract_Garden"; 
-
-    // Link this to the HEAVEN button
     public void LoadHeavenMode()
     {
         isHeavenSelected = true;
         SceneManager.LoadScene(gameSceneName);
     }
 
-    // Link this to the HELL button
     public void LoadHellMode()
     {
         isHeavenSelected = false;
         SceneManager.LoadScene(gameSceneName);
+    }
+
+    // --- NEW: Function to go back ---
+    public void LoadMenu()
+    {
+        SceneManager.LoadScene(menuSceneName);
     }
 }

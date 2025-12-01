@@ -1372,6 +1372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
   gameSceneName: Abstract_Garden
+  menuSceneName: Start Screen
 --- !u!4 &2046713070
 Transform:
   m_ObjectHideFlags: 0
