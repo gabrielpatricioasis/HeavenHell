@@ -7,6 +7,8 @@ TagManager:
   - Heaven
   - Hell
   - ReturnButton
+  - HeavenButton
+  - HellButton
   layers:
   - Default
   - TransparentFX
