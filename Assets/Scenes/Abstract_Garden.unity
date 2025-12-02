@@ -259,6 +259,7 @@ GameObject:
   - component: {fileID: 396642280}
   - component: {fileID: 396642279}
   - component: {fileID: 396642278}
+  - component: {fileID: 396642282}
   m_Layer: 0
   m_Name: ReturnButton
   m_TagString: ReturnButton
@@ -333,6 +334,18 @@ MonoBehaviour:
       - m_Target: {fileID: 1300041787}
         m_TargetAssemblyTypeName: SceneLoader, Assembly-CSharp
         m_MethodName: LoadMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 396642282}
+        m_TargetAssemblyTypeName: ReturnButton, Assembly-CSharp
+        m_MethodName: GoToStartScene
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -443,6 +456,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 396642276}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &396642282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396642276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e676687510f6c4eb0888e6ad7059cdfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReturnButton
+  startSceneName: Start Screen
 --- !u!1 &406434349
 GameObject:
   m_ObjectHideFlags: 0
@@ -1783,6 +1809,7 @@ GameObject:
   - component: {fileID: 1828036728}
   - component: {fileID: 1828036732}
   - component: {fileID: 1828036733}
+  - component: {fileID: 1828036734}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Untagged
@@ -1803,7 +1830,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.Inputs.InputActionManager
   m_ActionAssets:
-  - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  - {fileID: -944628639613478452, guid: 348c7dd6f45c943b29cc6be8817fe0be, type: 3}
 --- !u!114 &1828036729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1885,6 +1912,20 @@ MonoBehaviour:
   jumpAction: {fileID: 187161793506945269, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   leftTriggerAction: {fileID: -4289430672226363583, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   rightTriggerAction: {fileID: 7904272356298805229, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+--- !u!114 &1828036734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1828036727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe102fc6bba7f40aaae85c6865b36c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuManager
+  returnButtonObject: {fileID: 396642276}
+  menuButtonAction: {fileID: 4931515707689756915, guid: 348c7dd6f45c943b29cc6be8817fe0be, type: 3}
 --- !u!4 &1842554587 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 633250420949934588, guid: d5dd74d9e54b29c47934b703f5ef8ea5, type: 3}
