@@ -38,7 +38,31 @@ public class PlayerInteraction : MonoBehaviour
         HandleJump();
         HandlePushingGesture();
         HandleTriggerRaycast();
+
+        // --- AQUÍ ESTÁ LA LLAMADA QUE FALTABA ---
+        CheckIfFallen();
     }
+
+    // --- ESTA ES LA FUNCIÓN QUE FALTABA ---
+    void CheckIfFallen()
+    {
+        // Si bajas de altura -10 (caída al vacío)
+        if (transform.position.y < -10f)
+        {
+            // Apagamos el controller un momento para moverlo sin fisicas
+            characterController.enabled = false;
+
+            // Te devuelve al centro (0, 2, 0)
+            transform.position = new Vector3(0, 2, 0);
+
+            // Resetea la velocidad de caída
+            verticalVelocity = Vector3.zero;
+
+            characterController.enabled = true;
+            Debug.Log("¡Te caíste! Respawn al centro.");
+        }
+    }
+    // ---------------------------------------
 
     public void UpdateLogIntParameters(WorldManager.WorldState newState)
     {
