@@ -4,10 +4,10 @@ using UnityEngine.InputSystem;
 public class PlayerInteraction : MonoBehaviour
 {
     [Header("Current LogInt Parameters")]
-    public float currentSpeedMultiplier = 50.0f; 
+    public float currentSpeedMultiplier = 50.0f; // Velocidad alta por defecto
     public float currentGravityMultiplier = 0.5f;
     public float currentJumpForce = 10.0f;
-    public float distPush = 0.5f; // Distance from head to hand to trigger Push
+    public float distPush = 0.1f; // Distancia sensible para el gesto
 
     [Header("VR Component References")]
     public Transform leftHandCtrl;
@@ -17,9 +17,10 @@ public class PlayerInteraction : MonoBehaviour
     [Header("Input Actions")]
     public InputActionReference moveAction;
     public InputActionReference jumpAction;
+    public InputActionReference leftTriggerAction;
+    public InputActionReference rightTriggerAction;
 
-    // We removed the trigger actions because the Energy Stream script handles them now.
-
+    private InteractableEnergyStream currentActiveStream = null;
     private Vector3 verticalVelocity;
 
     void Start()
@@ -61,6 +62,7 @@ public class PlayerInteraction : MonoBehaviour
             Debug.Log("¡Te caíste! Respawn al centro.");
         }
     }
+    // ---------------------------------------
 
     public void UpdateLogIntParameters(WorldManager.WorldState newState)
     {
@@ -83,7 +85,7 @@ public class PlayerInteraction : MonoBehaviour
         Vector2 input = Vector2.zero;
         if (moveAction != null) input = moveAction.action.ReadValue<Vector2>();
 
-        // Keyboard Fallback
+        // Fallback Teclado (WASD)
         if (input == Vector2.zero)
         {
             if (Input.GetKey(KeyCode.W)) input.y = 1;
@@ -92,18 +94,19 @@ public class PlayerInteraction : MonoBehaviour
             if (Input.GetKey(KeyCode.D)) input.x = 1;
         }
 
-        // Camera-Relative Movement (Fixes the "Backward" bug)
-        Transform cameraTransform = Camera.main.transform;
-        Vector3 forwardFlat = cameraTransform.forward;
+        if (input.magnitude > 0.1f) input.Normalize();
+
+        Vector3 forwardFlat = transform.forward;
         forwardFlat.y = 0; forwardFlat.Normalize();
-        Vector3 rightFlat = cameraTransform.right;
+        Vector3 rightFlat = transform.right;
         rightFlat.y = 0; rightFlat.Normalize();
 
         Vector3 moveDir = rightFlat * input.x + forwardFlat * input.y;
 
-        characterController.Move(moveDir * currentSpeedMultiplier * Time.deltaTime);
+        float speed = (currentSpeedMultiplier > 10) ? currentSpeedMultiplier : 50f;
 
-        // Gravity
+        characterController.Move(moveDir * speed * Time.deltaTime);
+
         if (characterController.isGrounded && verticalVelocity.y < 0) verticalVelocity.y = -2f;
         verticalVelocity.y += Physics.gravity.y * currentGravityMultiplier * Time.deltaTime;
         characterController.Move(verticalVelocity * Time.deltaTime);
@@ -113,7 +116,8 @@ public class PlayerInteraction : MonoBehaviour
     {
         bool jumpPressed = false;
         if (jumpAction != null) jumpPressed = jumpAction.action.WasPerformedThisFrame();
-        if (Input.GetKeyDown(KeyCode.Space)) jumpPressed = true;
+
+        if (Input.GetKeyDown(KeyCode.Space) && !jumpPressed) jumpPressed = true;
 
         if (jumpPressed && characterController.isGrounded)
         {
@@ -123,26 +127,73 @@ public class PlayerInteraction : MonoBehaviour
 
     void HandlePushingGesture()
     {
-        // 1. Check Distance from Head to Hands
-        float distLeft = Vector3.Distance(Camera.main.transform.position, leftHandCtrl.position);
-        float distRight = Vector3.Distance(Camera.main.transform.position, rightHandCtrl.position);
+        bool gestureDetected = false;
 
-        // 2. Both arms must be extended
-        if (distLeft > distPush && distRight > distPush)
+        float distLeft = Vector3.Distance(transform.position, leftHandCtrl.position);
+        float distRight = Vector3.Distance(transform.position, rightHandCtrl.position);
+
+        if (distLeft > distPush && distRight > distPush) gestureDetected = true;
+        if (Input.GetKeyDown(KeyCode.P)) gestureDetected = true;
+
+        if (gestureDetected)
         {
-            // 3. Find Midpoint
-            Vector3 midPoint = (leftHandCtrl.position + rightHandCtrl.position) / 2;
+            RaycastHit hit;
+            Transform origin = Input.GetKey(KeyCode.P) ? Camera.main.transform : transform;
 
-            // 4. Blast Radius Check
-            Collider[] hits = Physics.OverlapSphere(midPoint, 2.0f); // 2 meter blast
-            foreach (var hit in hits)
+            // Raycast a 100 metros
+            if (Physics.Raycast(origin.position, origin.forward, out hit, 100.0f))
             {
-                InteractableMonolith mono = hit.GetComponent<InteractableMonolith>();
-                if (mono != null)
+                InteractableMonolith monolith = hit.collider.GetComponent<InteractableMonolith>();
+                if (monolith != null)
                 {
-                    mono.ReceivePush(); // Triggers Grow/Shatter
+                    monolith.ReceivePush();
                 }
             }
+        }
+    }
+
+    void HandleTriggerRaycast()
+    {
+        float leftValue = (leftTriggerAction != null) ? leftTriggerAction.action.ReadValue<float>() : 0;
+        float rightValue = (rightTriggerAction != null) ? rightTriggerAction.action.ReadValue<float>() : 0;
+
+        bool isTriggerHeld = (leftValue > 0.1f || rightValue > 0.1f || Input.GetKey(KeyCode.T));
+
+        InteractableEnergyStream detectedStream = null;
+
+        if (isTriggerHeld)
+        {
+            RaycastHit hit;
+            if (Input.GetKey(KeyCode.T))
+            {
+                if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, 100f))
+                {
+                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
+                }
+            }
+            else
+            {
+                if (leftValue > 0.1f && Physics.Raycast(leftHandCtrl.position, leftHandCtrl.forward, out hit, 100f))
+                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
+
+                if (detectedStream == null && rightValue > 0.1f && Physics.Raycast(rightHandCtrl.position, rightHandCtrl.forward, out hit, 100f))
+                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
+            }
+        }
+
+        if (detectedStream != null)
+        {
+            if (currentActiveStream != detectedStream)
+            {
+                if (currentActiveStream != null) currentActiveStream.StopTriggerHold();
+                currentActiveStream = detectedStream;
+            }
+            currentActiveStream.StartTriggerHold();
+        }
+        else if (currentActiveStream != null)
+        {
+            currentActiveStream.StopTriggerHold();
+            currentActiveStream = null;
         }
     }
 }
