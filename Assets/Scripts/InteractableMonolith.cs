@@ -6,87 +6,82 @@ public class InteractableMonolith : MonoBehaviour
     public Material materialHeaven;
     public Material materialHell;
 
-    [Header("Audio Settings")] // NEW: Audio Clips from your Design Doc
+    [Header("Audio Settings")]
     public AudioClip heavenClip;
     public AudioClip hellClip;
 
     [Header("Behavior Settings")]
-    public float growthScaleFactor = 1.2f;
-    public float shrinkScaleFactor = 0.8f;
+    public float growthScaleFactor = 2.5f; // Tamaño en Heaven
+    public float rubbleScaleFactor = 0.1f; // Tamaño en Hell
+    public float animationSpeed = 5.0f;
+
+    [Header("Effects")]
+    public GameObject shatterEffectPrefab;
 
     private Renderer myRenderer;
-    private AudioSource audioSource; // NEW: To play the sound
+    private AudioSource audioSource;
     private Vector3 originalScale;
-
-	 // --- NEW: A slot for our custom shatter effect ---
-    public GameObject shatterEffectPrefab;
-	private bool hasBeenInteractedWith = false;
+    private Vector3 targetScale;
 
     void Start()
     {
         myRenderer = GetComponent<Renderer>();
         originalScale = transform.localScale;
+        targetScale = originalScale;
 
-        // --- NEW: SETUP AUDIO ---
         audioSource = GetComponent<AudioSource>();
-        // If the prefab doesn't have an AudioSource, add one automatically
-        if (audioSource == null) 
+        if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.spatialBlend = 1.0f; // Make it 3D sound
+            audioSource.spatialBlend = 1.0f;
         }
 
-        // --- NEW: SET INITIAL LOOK ---
-        // Check the WorldManager immediately to see if we loaded into Heaven or Hell
+        UpdateMaterial();
+    }
+
+    void Update()
+    {
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * animationSpeed);
+        UpdateMaterial();
+    }
+
+    void UpdateMaterial()
+    {
+        if (myRenderer == null || WorldManager.Instance == null) return;
+
         if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
         {
-            if (myRenderer != null) myRenderer.material = materialHeaven;
+            if (myRenderer.sharedMaterial != materialHeaven) myRenderer.material = materialHeaven;
         }
         else
         {
-            if (myRenderer != null) myRenderer.material = materialHell;
+            if (myRenderer.sharedMaterial != materialHell) myRenderer.material = materialHell;
         }
     }
 
     public void ReceivePush()
     {
-        // Check the state again (in case it changed)
         if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
-        {
             Grow();
-        }
         else
-        {
             Shatter();
-        }
     }
 
     void Grow()
     {
-        transform.localScale *= growthScaleFactor;
-        myRenderer.material = materialHeaven;
-        
-        // --- NEW: PLAY SOUND ---
+        // Crecimiento normal, sin partículas
+        targetScale = originalScale * growthScaleFactor;
         if (heavenClip != null) audioSource.PlayOneShot(heavenClip);
-        
-        Debug.Log("Monolith Growing (Heaven)");
     }
 
-    // --- THIS IS THE NEW SHATTER FUNCTION ---
     void Shatter()
     {
-        transform.localScale *= shrinkScaleFactor;
-        myRenderer.material = materialHell;
+        // Destrucción (Implosión + Partículas)
+        targetScale = originalScale * rubbleScaleFactor;
 
-        // --- NEW: PLAY SOUND ---
         if (hellClip != null) audioSource.PlayOneShot(hellClip);
 
-        Debug.Log("Monolith Shattering (Hell)");
-    }
-    
-    // Optional Polish: Slowly return to original size so you can push it again
-    void Update()
-    {
-        transform.localScale = Vector3.Lerp(transform.localScale, originalScale, Time.deltaTime * 0.5f);
+        if (shatterEffectPrefab != null)
+            Instantiate(shatterEffectPrefab, transform.position, Quaternion.identity);
     }
 }

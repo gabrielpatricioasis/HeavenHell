@@ -3,24 +3,40 @@ using UnityEngine;
 public class SimpleMaterialSwap : MonoBehaviour
 {
     [Header("Materials")]
-    public Material materialHeaven; // Drag your Green/Blue ground here
-    public Material materialHell;   // Drag your Red/Dark ground here
+    public Material materialHeaven;
+    public Material materialHell;
+
+    private Renderer rend;
 
     void Start()
     {
-        // 1. Get the Renderer
-        Renderer rend = GetComponent<Renderer>();
-        if (rend == null) return;
+        rend = GetComponent<Renderer>();
+        // Ejecutar una vez al inicio
+        CheckAndSwap();
+    }
 
-        // 2. Ask WorldManager which world we are in
-        // (Make sure your WorldManager script is in the scene!)
-        if (WorldManager.Instance != null)
+    void Update()
+    {
+        // Ejecutar constantemente para detectar el cambio con la tecla Enter
+        CheckAndSwap();
+    }
+
+    void CheckAndSwap()
+    {
+        // Seguridad: Si no hay renderer o WorldManager, no hacemos nada
+        if (rend == null || WorldManager.Instance == null) return;
+
+        if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
         {
-            if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
+            // Solo cambiamos el material si no es el correcto (para no gastar recursos)
+            if (rend.sharedMaterial != materialHeaven)
             {
                 rend.material = materialHeaven;
             }
-            else
+        }
+        else // Hell
+        {
+            if (rend.sharedMaterial != materialHell)
             {
                 rend.material = materialHell;
             }

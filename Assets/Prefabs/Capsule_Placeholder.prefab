@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5540879882547509793}
   - component: {fileID: 6612127616318197107}
   - component: {fileID: 836654068112936226}
+  - component: {fileID: -4973512037615569239}
   m_Layer: 0
   m_Name: Capsule_Placeholder
   m_TagString: Untagged
@@ -156,7 +157,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractableMonolith
   materialHeaven: {fileID: 2100000, guid: cf3da56f55dc78845aa9ee532679ca9a, type: 2}
   materialHell: {fileID: 2100000, guid: 39961ee0aa5ac2d41ac462b57c29b50f, type: 2}
-  heavenClip: {fileID: 0}
-  hellClip: {fileID: 0}
-  growthScaleFactor: 1.2
-  shrinkScaleFactor: 0.8
+  heavenClip: {fileID: 8300000, guid: 4e52a09dc3f31ec45ae379fb90671ea7, type: 3}
+  hellClip: {fileID: 8300000, guid: 05386f4f2ac93d94cacfa70f7a8f6d0d, type: 3}
+  growthScaleFactor: 3
+  rubbleScaleFactor: 0.1
+  animationSpeed: 5
+  shatterEffectPrefab: {fileID: 2054026474248026324, guid: 5acac129286a643909fd7ed4666db9ea, type: 3}
+--- !u!114 &-4973512037615569239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7403412231256807358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d7f24b23a2f0e74a89067b7c3af230f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AvoidPlayer
+  detectionRadius: 5
+  moveSpeed: 10

@@ -2,72 +2,108 @@ using UnityEngine;
 
 public class InteractableEnergyStream : MonoBehaviour
 {
-    [Header("Heaven State Settings")]
-    public Color colorHeaven = Color.yellow;
-    public float intensityHeaven = 200f; // More particles per second.
+    [Header("Audio Components")]
+    public AudioSource streamAudioSource;
 
-    [Header("Hell State Settings")]
-    public Color colorHell = Color.red;
-    public float intensityHell = 50f;   // Fewer, more chaotic particles.
+    [Header("Heaven Settings (Creator)")]
+    public Color colorHeaven = new Color(1f, 0.92f, 0.016f);
+
+    [Space(10)]
+    public float rateHeavenIdle = 500f;
+    public float sizeHeavenIdle = 1.0f;
+    public float speedHeavenIdle = 5.0f;
+
+    [Space(10)]
+    public float rateHeavenInteract = 8000f;
+    public float sizeHeavenInteract = 3.5f;
+    public float speedHeavenInteract = 25.0f;
+    public AudioClip soundHeaven;
+
+    [Header("Hell Settings (Corruptor)")]
+    public Color colorHell = Color.gray;
+
+    [Space(10)]
+    public float rateHellIdle = 500f;
+    public float sizeHellIdle = 1.0f;
+    public float speedHellIdle = 5.0f;
+
+    [Space(10)]
+    public float rateHellInteract = 0f;
+    public float sizeHellInteract = 0.1f;
+    public float speedHellInteract = 0f;
+    public AudioClip soundHell;
 
     private ParticleSystem myParticleSystem;
     private ParticleSystem.MainModule mainModule;
     private ParticleSystem.EmissionModule emissionModule;
-
-    // Store the original values so we can return to a neutral state if needed.
-    private Color originalColor;
-    private float originalIntensity;
+    private bool isInteracting = false;
 
     void Start()
     {
-        // Get and store the particle system modules for efficiency.
         myParticleSystem = GetComponent<ParticleSystem>();
         mainModule = myParticleSystem.main;
         emissionModule = myParticleSystem.emission;
 
-        // Save the initial state of the particle system.
-        originalColor = mainModule.startColor.color;
-        originalIntensity = emissionModule.rateOverTime.constant;
+        if (streamAudioSource == null) streamAudioSource = GetComponent<AudioSource>();
+        if (WorldManager.Instance != null) UpdateVisuals();
     }
 
-    // The player's script calls this function when the trigger hold BEGINS.
-    public void StartTriggerHold()
+    void Update()
+    {
+        if (WorldManager.Instance != null) UpdateVisuals();
+    }
+
+    void UpdateVisuals()
     {
         if (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven)
         {
-            Harmonize();
+            mainModule.startColor = colorHeaven;
+            if (isInteracting)
+            {
+                emissionModule.rateOverTime = rateHeavenInteract;
+                mainModule.startSize = sizeHeavenInteract;
+                mainModule.startSpeed = speedHeavenInteract;
+            }
+            else
+            {
+                emissionModule.rateOverTime = rateHeavenIdle;
+                mainModule.startSize = sizeHeavenIdle;
+                mainModule.startSpeed = speedHeavenIdle;
+            }
         }
-        else // If the state is Hell
+        else
         {
-            Drain();
+            mainModule.startColor = colorHell;
+            if (isInteracting)
+            {
+                emissionModule.rateOverTime = rateHellInteract;
+                mainModule.startSize = sizeHellInteract;
+                mainModule.startSpeed = speedHellInteract;
+            }
+            else
+            {
+                emissionModule.rateOverTime = rateHellIdle;
+                mainModule.startSize = sizeHellIdle;
+                mainModule.startSpeed = speedHellIdle;
+            }
         }
     }
 
-    // The player's script calls this function when the trigger hold ENDS.
+    public void StartTriggerHold()
+    {
+        isInteracting = true;
+        AudioClip clipToPlay = (WorldManager.Instance.currentState == WorldManager.WorldState.Heaven) ? soundHeaven : soundHell;
+
+        if (streamAudioSource != null && clipToPlay != null)
+        {
+            streamAudioSource.clip = clipToPlay;
+            streamAudioSource.Play();
+        }
+    }
+
     public void StopTriggerHold()
     {
-        // For now, let's make the stream return to its neutral state when the user lets go.
-        // (Alternatively, we could decide to make the change permanent).
-        mainModule.startColor = originalColor;
-        emissionModule.rateOverTime = originalIntensity;
-        Debug.Log("Energy Stream returning to neutral.");
-    }
-
-    void Harmonize()
-    {
-        // Change the color and increase the flow rate.
-        mainModule.startColor = colorHeaven;
-        emissionModule.rateOverTime = intensityHeaven;
-        Debug.Log("Energy Stream is Harmonizing.");
-        // We would trigger the "harmonious" sound and the soft haptic pulse here.
-    }
-
-    void Drain()
-    {
-        // Change the color and decrease the flow rate.
-        mainModule.startColor = colorHell;
-        emissionModule.rateOverTime = intensityHell;
-        Debug.Log("Energy Stream is Draining.");
-        // We would trigger the "draining" sound and the grating haptic feedback here.
+        isInteracting = false;
+        if (streamAudioSource != null) streamAudioSource.Stop();
     }
 }

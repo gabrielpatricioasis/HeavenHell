@@ -40,7 +40,7 @@ public class WorldManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             if (currentState == WorldState.Heaven) SetState(WorldState.Hell);
             else SetState(WorldState.Heaven);
