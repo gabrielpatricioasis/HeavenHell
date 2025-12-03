@@ -4,10 +4,9 @@ using UnityEngine.InputSystem;
 public class PlayerInteraction : MonoBehaviour
 {
     [Header("Current LogInt Parameters")]
-    public float currentSpeedMultiplier = 50.0f; // Velocidad alta por defecto
+    public float currentSpeedMultiplier = 50.0f;
     public float currentGravityMultiplier = 0.5f;
     public float currentJumpForce = 10.0f;
-    public float distPush = 0.1f; // Distancia sensible para el gesto
 
     [Header("VR Component References")]
     public Transform leftHandCtrl;
@@ -20,49 +19,126 @@ public class PlayerInteraction : MonoBehaviour
     public InputActionReference leftTriggerAction;
     public InputActionReference rightTriggerAction;
 
+    [Header("Visuals - ¡NUEVO!")]
+    public LineRenderer leftLaser;  // Arrastra el LineRenderer de la mano Izq
+    public LineRenderer rightLaser; // Arrastra el LineRenderer de la mano Der
+
     private InteractableEnergyStream currentActiveStream = null;
     private Vector3 verticalVelocity;
 
     void Start()
     {
-        if (characterController == null)
-            characterController = GetComponent<CharacterController>();
-
-        if (WorldManager.Instance != null)
-            UpdateLogIntParameters(WorldManager.Instance.currentState);
+        if (characterController == null) characterController = GetComponent<CharacterController>();
+        if (WorldManager.Instance != null) UpdateLogIntParameters(WorldManager.Instance.currentState);
     }
 
     void Update()
     {
         HandleLocomotion();
         HandleJump();
-        HandlePushingGesture();
-        HandleTriggerRaycast();
-
-        // --- AQUÍ ESTÁ LA LLAMADA QUE FALTABA ---
         CheckIfFallen();
+
+        // ESTA ES LA FUNCIÓN NUEVA QUE HACE TODO (Monolito + Energia)
+        HandleShootingInteraction();
     }
 
-    // --- ESTA ES LA FUNCIÓN QUE FALTABA ---
+    // --- FUNCIÓN UNIFICADA: APUNTAR Y DISPARAR ---
+    void HandleShootingInteraction()
+    {
+        // 1. Leemos los Triggers
+        float leftValue = (leftTriggerAction != null) ? leftTriggerAction.action.ReadValue<float>() : 0;
+        float rightValue = (rightTriggerAction != null) ? rightTriggerAction.action.ReadValue<float>() : 0;
+
+        // Teclas de PC para emergencias (T o P disparan igual)
+        bool pcShoot = Input.GetKey(KeyCode.T) || Input.GetKey(KeyCode.P);
+
+        // --- MANO IZQUIERDA ---
+        if (leftValue > 0.1f)
+        {
+            FireRay(leftHandCtrl, leftLaser);
+        }
+        else
+        {
+            if (leftLaser != null) leftLaser.enabled = false; // Apagar láser si no disparas
+        }
+
+        // --- MANO DERECHA ---
+        if (rightValue > 0.1f)
+        {
+            FireRay(rightHandCtrl, rightLaser);
+        }
+        else
+        {
+            if (rightLaser != null) rightLaser.enabled = false; // Apagar láser si no disparas
+        }
+
+        // --- MODO PC (Cámara) ---
+        if (pcShoot)
+        {
+            FireRay(Camera.main.transform, null);
+        }
+
+        // LÓGICA DE SOLTAR (Para el Energy Stream)
+        // Si no aprietas nada, soltamos el stream activo
+        if (leftValue <= 0.1f && rightValue <= 0.1f && !pcShoot && currentActiveStream != null)
+        {
+            currentActiveStream.StopTriggerHold();
+            currentActiveStream = null;
+        }
+    }
+
+    // Dispara el rayo y decide qué hacer
+    void FireRay(Transform origin, LineRenderer laser)
+    {
+        // Activar Láser Visual
+        if (laser != null)
+        {
+            laser.enabled = true;
+            laser.SetPosition(0, origin.position); // Inicio en la mano
+            laser.SetPosition(1, origin.position + origin.forward * 50f); // Final lejos (por defecto)
+        }
+
+        RaycastHit hit;
+        // Lanzamos rayo a 100 metros
+        if (Physics.Raycast(origin.position, origin.forward, out hit, 100f))
+        {
+            // Cortar el láser visual donde choque
+            if (laser != null) laser.SetPosition(1, hit.point);
+
+            // 1. ¿Es un MONOLITO?
+            InteractableMonolith monolith = hit.collider.GetComponent<InteractableMonolith>();
+            if (monolith != null)
+            {
+                monolith.ReceivePush(); // ¡CRECER / EXPLOTAR!
+            }
+
+            // 2. ¿Es un ENERGY STREAM?
+            InteractableEnergyStream stream = hit.collider.GetComponent<InteractableEnergyStream>();
+            if (stream != null)
+            {
+                // Gestionar cambio de stream
+                if (currentActiveStream != stream)
+                {
+                    if (currentActiveStream != null) currentActiveStream.StopTriggerHold();
+                    currentActiveStream = stream;
+                }
+                currentActiveStream.StartTriggerHold(); // ¡SONIDO / COLOR!
+            }
+        }
+    }
+
+    // --- (RESTO DE TU CÓDIGO QUE YA FUNCIONABA) ---
     void CheckIfFallen()
     {
-        // Si bajas de altura -10 (caída al vacío)
         if (transform.position.y < -10f)
         {
-            // Apagamos el controller un momento para moverlo sin fisicas
             characterController.enabled = false;
-
-            // Te devuelve al centro (0, 2, 0)
             transform.position = new Vector3(0, 2, 0);
-
-            // Resetea la velocidad de caída
             verticalVelocity = Vector3.zero;
-
             characterController.enabled = true;
             Debug.Log("¡Te caíste! Respawn al centro.");
         }
     }
-    // ---------------------------------------
 
     public void UpdateLogIntParameters(WorldManager.WorldState newState)
     {
@@ -85,7 +161,6 @@ public class PlayerInteraction : MonoBehaviour
         Vector2 input = Vector2.zero;
         if (moveAction != null) input = moveAction.action.ReadValue<Vector2>();
 
-        // Fallback Teclado (WASD)
         if (input == Vector2.zero)
         {
             if (Input.GetKey(KeyCode.W)) input.y = 1;
@@ -96,15 +171,11 @@ public class PlayerInteraction : MonoBehaviour
 
         if (input.magnitude > 0.1f) input.Normalize();
 
-        Vector3 forwardFlat = transform.forward;
-        forwardFlat.y = 0; forwardFlat.Normalize();
-        Vector3 rightFlat = transform.right;
-        rightFlat.y = 0; rightFlat.Normalize();
-
+        Vector3 forwardFlat = transform.forward; forwardFlat.y = 0; forwardFlat.Normalize();
+        Vector3 rightFlat = transform.right; rightFlat.y = 0; rightFlat.Normalize();
         Vector3 moveDir = rightFlat * input.x + forwardFlat * input.y;
 
         float speed = (currentSpeedMultiplier > 10) ? currentSpeedMultiplier : 50f;
-
         characterController.Move(moveDir * speed * Time.deltaTime);
 
         if (characterController.isGrounded && verticalVelocity.y < 0) verticalVelocity.y = -2f;
@@ -114,86 +185,28 @@ public class PlayerInteraction : MonoBehaviour
 
     void HandleJump()
     {
+        // 1. SEGURIDAD: ¿Estás disparando con el gatillo?
+        float triggerValue = 0f;
+        if (rightTriggerAction != null) triggerValue = rightTriggerAction.action.ReadValue<float>();
+
+        // Si aprietas el gatillo más de un 10%, PROHIBIDO SALTAR.
+        // Esto soluciona que salgas volando al disparar el láser.
+        if (triggerValue > 0.1f) return;
+
+        // 2. DETECTAR SALTO (Botón A)
         bool jumpPressed = false;
         if (jumpAction != null) jumpPressed = jumpAction.action.WasPerformedThisFrame();
 
-        if (Input.GetKeyDown(KeyCode.Space) && !jumpPressed) jumpPressed = true;
+        // Tecla Espacio (PC)
+        if (Input.GetKeyDown(KeyCode.Space)) jumpPressed = true;
 
+        // 3. EJECUTAR SALTO (Bajito)
         if (jumpPressed && characterController.isGrounded)
         {
-            verticalVelocity.y = Mathf.Sqrt(currentJumpForce * -2f * (Physics.gravity.y * currentGravityMultiplier));
-        }
-    }
+            // Fuerza hardcodeada a 2.0f para que no saltes al espacio exterior
+            float jumpForce = 2.0f;
 
-    void HandlePushingGesture()
-    {
-        bool gestureDetected = false;
-
-        float distLeft = Vector3.Distance(transform.position, leftHandCtrl.position);
-        float distRight = Vector3.Distance(transform.position, rightHandCtrl.position);
-
-        if (distLeft > distPush && distRight > distPush) gestureDetected = true;
-        if (Input.GetKeyDown(KeyCode.P)) gestureDetected = true;
-
-        if (gestureDetected)
-        {
-            RaycastHit hit;
-            Transform origin = Input.GetKey(KeyCode.P) ? Camera.main.transform : transform;
-
-            // Raycast a 100 metros
-            if (Physics.Raycast(origin.position, origin.forward, out hit, 100.0f))
-            {
-                InteractableMonolith monolith = hit.collider.GetComponent<InteractableMonolith>();
-                if (monolith != null)
-                {
-                    monolith.ReceivePush();
-                }
-            }
-        }
-    }
-
-    void HandleTriggerRaycast()
-    {
-        float leftValue = (leftTriggerAction != null) ? leftTriggerAction.action.ReadValue<float>() : 0;
-        float rightValue = (rightTriggerAction != null) ? rightTriggerAction.action.ReadValue<float>() : 0;
-
-        bool isTriggerHeld = (leftValue > 0.1f || rightValue > 0.1f || Input.GetKey(KeyCode.T));
-
-        InteractableEnergyStream detectedStream = null;
-
-        if (isTriggerHeld)
-        {
-            RaycastHit hit;
-            if (Input.GetKey(KeyCode.T))
-            {
-                if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, 100f))
-                {
-                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
-                }
-            }
-            else
-            {
-                if (leftValue > 0.1f && Physics.Raycast(leftHandCtrl.position, leftHandCtrl.forward, out hit, 100f))
-                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
-
-                if (detectedStream == null && rightValue > 0.1f && Physics.Raycast(rightHandCtrl.position, rightHandCtrl.forward, out hit, 100f))
-                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
-            }
-        }
-
-        if (detectedStream != null)
-        {
-            if (currentActiveStream != detectedStream)
-            {
-                if (currentActiveStream != null) currentActiveStream.StopTriggerHold();
-                currentActiveStream = detectedStream;
-            }
-            currentActiveStream.StartTriggerHold();
-        }
-        else if (currentActiveStream != null)
-        {
-            currentActiveStream.StopTriggerHold();
-            currentActiveStream = null;
+            verticalVelocity.y = Mathf.Sqrt(jumpForce * -2f * (Physics.gravity.y * currentGravityMultiplier));
         }
     }
 }
