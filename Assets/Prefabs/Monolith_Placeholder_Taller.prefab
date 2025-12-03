@@ -131,7 +131,8 @@ MonoBehaviour:
   heavenClip: {fileID: 8300000, guid: 4e52a09dc3f31ec45ae379fb90671ea7, type: 3}
   hellClip: {fileID: 8300000, guid: 05386f4f2ac93d94cacfa70f7a8f6d0d, type: 3}
   growthScaleFactor: 3
-  growSpeed: 2
+  rubbleScaleFactor: 0.1
+  animationSpeed: 5
   shatterEffectPrefab: {fileID: 2054026474248026324, guid: 5acac129286a643909fd7ed4666db9ea, type: 3}
 --- !u!54 &3508034049548725957
 Rigidbody:
@@ -172,5 +173,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d7f24b23a2f0e74a89067b7c3af230f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AvoidPlayer
-  detectionRadius: 5
+  baseDetectionRadius: 4
   moveSpeed: 10

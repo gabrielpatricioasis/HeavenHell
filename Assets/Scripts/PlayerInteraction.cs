@@ -4,10 +4,10 @@ using UnityEngine.InputSystem;
 public class PlayerInteraction : MonoBehaviour
 {
     [Header("Current LogInt Parameters")]
-    public float currentSpeedMultiplier = 50.0f; // Velocidad alta por defecto
+    // Valores por defecto (se sobrescriben al iniciar según el mundo)
+    public float currentSpeedMultiplier = 80.0f;
     public float currentGravityMultiplier = 0.5f;
-    public float currentJumpForce = 10.0f;
-    public float distPush = 0.1f; // Distancia sensible para el gesto
+    public float currentJumpForce = 20.0f;
 
     [Header("VR Component References")]
     public Transform leftHandCtrl;
@@ -15,11 +15,16 @@ public class PlayerInteraction : MonoBehaviour
     public CharacterController characterController;
 
     [Header("Input Actions")]
-    public InputActionReference moveAction;
-    public InputActionReference jumpAction;
-    public InputActionReference leftTriggerAction;
-    public InputActionReference rightTriggerAction;
+    public InputActionReference moveAction;        // XRI Left Locomotion/Move
+    public InputActionReference jumpAction;        // XRI Right Interaction/Select (Button A)
+    public InputActionReference leftTriggerAction; // XRI Left Interaction/Activate
+    public InputActionReference rightTriggerAction;// XRI Right Interaction/Activate
 
+    [Header("Visuals")]
+    public LineRenderer leftLaser;  // Arrastra el LineRenderer de la mano Izq
+    public LineRenderer rightLaser; // Arrastra el LineRenderer de la mano Der
+
+    // Variables privadas
     private InteractableEnergyStream currentActiveStream = null;
     private Vector3 verticalVelocity;
 
@@ -28,6 +33,7 @@ public class PlayerInteraction : MonoBehaviour
         if (characterController == null)
             characterController = GetComponent<CharacterController>();
 
+        // Inicializamos los parámetros según el mundo actual
         if (WorldManager.Instance != null)
             UpdateLogIntParameters(WorldManager.Instance.currentState);
     }
@@ -36,56 +42,36 @@ public class PlayerInteraction : MonoBehaviour
     {
         HandleLocomotion();
         HandleJump();
-        HandlePushingGesture();
-        HandleTriggerRaycast();
-
-        // --- AQUÍ ESTÁ LA LLAMADA QUE FALTABA ---
         CheckIfFallen();
+
+        // Función unificada para Monolitos y Energía
+        HandleShootingInteraction();
     }
 
-    // --- ESTA ES LA FUNCIÓN QUE FALTABA ---
-    void CheckIfFallen()
-    {
-        // Si bajas de altura -10 (caída al vacío)
-        if (transform.position.y < -10f)
-        {
-            // Apagamos el controller un momento para moverlo sin fisicas
-            characterController.enabled = false;
-
-            // Te devuelve al centro (0, 2, 0)
-            transform.position = new Vector3(0, 2, 0);
-
-            // Resetea la velocidad de caída
-            verticalVelocity = Vector3.zero;
-
-            characterController.enabled = true;
-            Debug.Log("¡Te caíste! Respawn al centro.");
-        }
-    }
-    // ---------------------------------------
-
+    // --- CONFIGURACIÓN DE MUNDOS (VELOCIDADES) ---
     public void UpdateLogIntParameters(WorldManager.WorldState newState)
     {
         if (newState == WorldManager.WorldState.Heaven)
         {
-            currentSpeedMultiplier = 50.0f;
-            currentGravityMultiplier = 0.5f;
-            currentJumpForce = 10.0f;
+            currentSpeedMultiplier = 80.0f; // MUY RÁPIDO
+            currentGravityMultiplier = 0.5f; // Flotante
+            currentJumpForce = 20.0f;        // Salto alto
         }
         else
         {
-            currentSpeedMultiplier = 20.0f;
-            currentGravityMultiplier = 2.0f;
-            currentJumpForce = 2.0f;
+            currentSpeedMultiplier = 15.0f; // MUY LENTO (Pesado)
+            currentGravityMultiplier = 2.0f; // Gravedad fuerte
+            currentJumpForce = 10.0f;        // Salto apenas perceptible
         }
     }
 
+    // --- MOVIMIENTO ---
     void HandleLocomotion()
     {
         Vector2 input = Vector2.zero;
         if (moveAction != null) input = moveAction.action.ReadValue<Vector2>();
 
-        // Fallback Teclado (WASD)
+        // Soporte para Teclado (WASD) si no hay mando
         if (input == Vector2.zero)
         {
             if (Input.GetKey(KeyCode.W)) input.y = 1;
@@ -94,106 +80,136 @@ public class PlayerInteraction : MonoBehaviour
             if (Input.GetKey(KeyCode.D)) input.x = 1;
         }
 
+        // Fix Turbo (Normalizar si hay input mínimo)
         if (input.magnitude > 0.1f) input.Normalize();
 
-        Vector3 forwardFlat = transform.forward;
-        forwardFlat.y = 0; forwardFlat.Normalize();
-        Vector3 rightFlat = transform.right;
-        rightFlat.y = 0; rightFlat.Normalize();
-
+        // Direcciones planas (Ignorar altura para no frenarse mirando al suelo)
+        Vector3 forwardFlat = transform.forward; forwardFlat.y = 0; forwardFlat.Normalize();
+        Vector3 rightFlat = transform.right; rightFlat.y = 0; rightFlat.Normalize();
         Vector3 moveDir = rightFlat * input.x + forwardFlat * input.y;
 
-        float speed = (currentSpeedMultiplier > 10) ? currentSpeedMultiplier : 50f;
+        // MOVIMIENTO REAL (Usamos la variable directa, sin seguros)
+        characterController.Move(moveDir * currentSpeedMultiplier * Time.deltaTime);
 
-        characterController.Move(moveDir * speed * Time.deltaTime);
-
+        // GRAVEDAD
         if (characterController.isGrounded && verticalVelocity.y < 0) verticalVelocity.y = -2f;
         verticalVelocity.y += Physics.gravity.y * currentGravityMultiplier * Time.deltaTime;
         characterController.Move(verticalVelocity * Time.deltaTime);
     }
 
+    // --- SALTO ---
     void HandleJump()
     {
+        // 1. SEGURIDAD: ¿Estás disparando con el gatillo derecho?
+        float triggerValue = 0f;
+        if (rightTriggerAction != null) triggerValue = rightTriggerAction.action.ReadValue<float>();
+
+        // BLOQUEO: Si aprietas gatillo, PROHIBIDO SALTAR
+        if (triggerValue > 0.1f) return;
+
+        // 2. DETECTAR SALTO (Botón A / Grip)
         bool jumpPressed = false;
         if (jumpAction != null) jumpPressed = jumpAction.action.WasPerformedThisFrame();
 
-        if (Input.GetKeyDown(KeyCode.Space) && !jumpPressed) jumpPressed = true;
+        // Soporte Tecla Espacio (PC)
+        if (Input.GetKeyDown(KeyCode.Space)) jumpPressed = true;
 
+        // 3. EJECUTAR SALTO
         if (jumpPressed && characterController.isGrounded)
         {
+            // Usamos la fuerza configurada en UpdateLogIntParameters
             verticalVelocity.y = Mathf.Sqrt(currentJumpForce * -2f * (Physics.gravity.y * currentGravityMultiplier));
         }
     }
 
-    void HandlePushingGesture()
+    // --- DISPARO Y LÁSER (Monolitos + Energía) ---
+    void HandleShootingInteraction()
     {
-        bool gestureDetected = false;
+        // Leemos los Triggers
+        float leftValue = (leftTriggerAction != null) ? leftTriggerAction.action.ReadValue<float>() : 0;
+        float rightValue = (rightTriggerAction != null) ? rightTriggerAction.action.ReadValue<float>() : 0;
 
-        float distLeft = Vector3.Distance(transform.position, leftHandCtrl.position);
-        float distRight = Vector3.Distance(transform.position, rightHandCtrl.position);
+        // Teclas de PC (T o P disparan)
+        bool pcShoot = Input.GetKey(KeyCode.T) || Input.GetKey(KeyCode.P);
 
-        if (distLeft > distPush && distRight > distPush) gestureDetected = true;
-        if (Input.GetKeyDown(KeyCode.P)) gestureDetected = true;
-
-        if (gestureDetected)
+        // MANO IZQUIERDA
+        if (leftValue > 0.1f)
         {
-            RaycastHit hit;
-            Transform origin = Input.GetKey(KeyCode.P) ? Camera.main.transform : transform;
+            FireRay(leftHandCtrl, leftLaser);
+        }
+        else if (leftLaser != null) leftLaser.enabled = false;
 
-            // Raycast a 100 metros
-            if (Physics.Raycast(origin.position, origin.forward, out hit, 100.0f))
+        // MANO DERECHA
+        if (rightValue > 0.1f)
+        {
+            FireRay(rightHandCtrl, rightLaser);
+        }
+        else if (rightLaser != null) rightLaser.enabled = false;
+
+        // MODO PC (Cámara)
+        if (pcShoot)
+        {
+            FireRay(Camera.main.transform, null);
+        }
+
+        // SOLTAR ENERGY STREAM (Si no se aprieta nada)
+        if (leftValue <= 0.1f && rightValue <= 0.1f && !pcShoot && currentActiveStream != null)
+        {
+            currentActiveStream.StopTriggerHold();
+            currentActiveStream = null;
+        }
+    }
+
+    // Lógica del Raycast
+    void FireRay(Transform origin, LineRenderer laser)
+    {
+        // DISTANCIA AUMENTADA A 500 METROS
+        float maxDist = 500f;
+
+        // Dibujar Láser
+        if (laser != null)
+        {
+            laser.enabled = true;
+            laser.SetPosition(0, origin.position);
+            laser.SetPosition(1, origin.position + origin.forward * maxDist);
+        }
+
+        RaycastHit hit;
+        if (Physics.Raycast(origin.position, origin.forward, out hit, maxDist))
+        {
+            // Cortar láser visual donde choque
+            if (laser != null) laser.SetPosition(1, hit.point);
+
+            // 1. MONOLITOS (Crecer/Explotar)
+            InteractableMonolith monolith = hit.collider.GetComponent<InteractableMonolith>();
+            if (monolith != null)
             {
-                InteractableMonolith monolith = hit.collider.GetComponent<InteractableMonolith>();
-                if (monolith != null)
+                monolith.ReceivePush();
+            }
+
+            // 2. ENERGY STREAMS (Activar sonido/partículas)
+            InteractableEnergyStream stream = hit.collider.GetComponent<InteractableEnergyStream>();
+            if (stream != null)
+            {
+                if (currentActiveStream != stream)
                 {
-                    monolith.ReceivePush();
+                    if (currentActiveStream != null) currentActiveStream.StopTriggerHold();
+                    currentActiveStream = stream;
                 }
+                currentActiveStream.StartTriggerHold();
             }
         }
     }
 
-    void HandleTriggerRaycast()
+    // --- SEGURIDAD: RESPAWN SI CAES ---
+    void CheckIfFallen()
     {
-        float leftValue = (leftTriggerAction != null) ? leftTriggerAction.action.ReadValue<float>() : 0;
-        float rightValue = (rightTriggerAction != null) ? rightTriggerAction.action.ReadValue<float>() : 0;
-
-        bool isTriggerHeld = (leftValue > 0.1f || rightValue > 0.1f || Input.GetKey(KeyCode.T));
-
-        InteractableEnergyStream detectedStream = null;
-
-        if (isTriggerHeld)
+        if (transform.position.y < -10f)
         {
-            RaycastHit hit;
-            if (Input.GetKey(KeyCode.T))
-            {
-                if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, 100f))
-                {
-                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
-                }
-            }
-            else
-            {
-                if (leftValue > 0.1f && Physics.Raycast(leftHandCtrl.position, leftHandCtrl.forward, out hit, 100f))
-                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
-
-                if (detectedStream == null && rightValue > 0.1f && Physics.Raycast(rightHandCtrl.position, rightHandCtrl.forward, out hit, 100f))
-                    detectedStream = hit.collider.GetComponent<InteractableEnergyStream>();
-            }
-        }
-
-        if (detectedStream != null)
-        {
-            if (currentActiveStream != detectedStream)
-            {
-                if (currentActiveStream != null) currentActiveStream.StopTriggerHold();
-                currentActiveStream = detectedStream;
-            }
-            currentActiveStream.StartTriggerHold();
-        }
-        else if (currentActiveStream != null)
-        {
-            currentActiveStream.StopTriggerHold();
-            currentActiveStream = null;
+            characterController.enabled = false;
+            transform.position = new Vector3(0, 2, 0); // Vuelta al centro
+            verticalVelocity = Vector3.zero;
+            characterController.enabled = true;
         }
     }
 }
