@@ -266,7 +266,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &396642277
 Transform:
   m_ObjectHideFlags: 0
@@ -276,7 +276,7 @@ Transform:
   m_GameObject: {fileID: 396642276}
   serializedVersion: 2
   m_LocalRotation: {x: -0.013940477, y: -0.2279249, z: 0.059435535, w: 0.97176296}
-  m_LocalPosition: {x: -0.42, y: 0.25, z: 0.6}
+  m_LocalPosition: {x: -0.32, y: 0.21, z: 0.6}
   m_LocalScale: {x: 0.15, y: 0.05, z: 0.02}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1753,6 +1753,7 @@ GameObject:
   - component: {fileID: 1828036732}
   - component: {fileID: 1828036733}
   - component: {fileID: 1828036734}
+  - component: {fileID: 1828036735}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Untagged
@@ -1869,6 +1870,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuManager
   returnButtonObject: {fileID: 396642276}
+--- !u!114 &1828036735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1828036727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 370f4393a01ecb84abe616b0ad13ed17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleReturn
+  menuSceneName: Start Screen
+  menuButton: {fileID: -6131295136447488360, guid: c348712bda248c246b8c49b3db54643f, type: 3}
 --- !u!4 &1842554587 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 633250420949934588, guid: d5dd74d9e54b29c47934b703f5ef8ea5, type: 3}
@@ -2457,7 +2472,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandMenuClicker
   menuButtonAction:
-    m_UseReference: 1
+    m_UseReference: 0
     m_Action:
       m_Name: Menu Button
       m_Type: 0
@@ -2465,7 +2480,15 @@ MonoBehaviour:
       m_Id: 2c4caa04-689e-4fb2-83c8-4c8382b838f0
       m_Processors: 
       m_Interactions: 
-      m_SingletonActionBindings: []
+      m_SingletonActionBindings:
+      - m_Name: 
+        m_Id: 4dbec411-d4e3-401b-bbe5-f2dfbfa7f176
+        m_Path: <OculusTouchController>/menu
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: Menu Button
+        m_Flags: 0
       m_Flags: 0
     m_Reference: {fileID: 4116954447336496447, guid: b6d5c44ebe3244b7692e81ae8265eb22, type: 3}
 --- !u!120 &2065587709
