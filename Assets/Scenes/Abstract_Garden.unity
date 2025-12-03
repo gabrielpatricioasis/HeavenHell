@@ -1868,7 +1868,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuManager
   returnButtonObject: {fileID: 396642276}
-  menuButtonAction: {fileID: 4931515707689756915, guid: 348c7dd6f45c943b29cc6be8817fe0be, type: 3}
 --- !u!4 &1842554587 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 633250420949934588, guid: d5dd74d9e54b29c47934b703f5ef8ea5, type: 3}
