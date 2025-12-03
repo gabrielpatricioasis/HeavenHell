@@ -1848,10 +1848,12 @@ MonoBehaviour:
   currentSpeedMultiplier: 80
   currentGravityMultiplier: 0.5
   currentJumpForce: 20
+  turnSpeed: 60
   leftHandCtrl: {fileID: 2065587704}
   rightHandCtrl: {fileID: 1925038276}
   characterController: {fileID: 1828036732}
   moveAction: {fileID: 6972639530819350904, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  turnAction: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   jumpAction: {fileID: 187161793506945269, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   leftTriggerAction: {fileID: -4289430672226363583, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   rightTriggerAction: {fileID: 7904272356298805229, guid: c348712bda248c246b8c49b3db54643f, type: 3}

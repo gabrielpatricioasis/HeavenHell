@@ -9,6 +9,9 @@ public class PlayerInteraction : MonoBehaviour
     public float currentGravityMultiplier = 0.5f;
     public float currentJumpForce = 20.0f;
 
+    // --- NUEVO: Velocidad de giro ---
+    public float turnSpeed = 60.0f;
+
     [Header("VR Component References")]
     public Transform leftHandCtrl;
     public Transform rightHandCtrl;
@@ -16,6 +19,7 @@ public class PlayerInteraction : MonoBehaviour
 
     [Header("Input Actions")]
     public InputActionReference moveAction;        // XRI Left Locomotion/Move
+    public InputActionReference turnAction;        // XRI Right Locomotion/Turn (NUEVO)
     public InputActionReference jumpAction;        // XRI Right Interaction/Select (Button A)
     public InputActionReference leftTriggerAction; // XRI Left Interaction/Activate
     public InputActionReference rightTriggerAction;// XRI Right Interaction/Activate
@@ -41,6 +45,7 @@ public class PlayerInteraction : MonoBehaviour
     void Update()
     {
         HandleLocomotion();
+        HandleRotation(); // <--- NUEVO: Función de rotación
         HandleJump();
         CheckIfFallen();
 
@@ -61,7 +66,7 @@ public class PlayerInteraction : MonoBehaviour
         {
             currentSpeedMultiplier = 15.0f; // MUY LENTO (Pesado)
             currentGravityMultiplier = 2.0f; // Gravedad fuerte
-            currentJumpForce = 10.0f;        // Salto apenas perceptible
+            currentJumpForce = 3.0f;        // Salto apenas perceptible
         }
     }
 
@@ -95,6 +100,32 @@ public class PlayerInteraction : MonoBehaviour
         if (characterController.isGrounded && verticalVelocity.y < 0) verticalVelocity.y = -2f;
         verticalVelocity.y += Physics.gravity.y * currentGravityMultiplier * Time.deltaTime;
         characterController.Move(verticalVelocity * Time.deltaTime);
+    }
+
+    // --- NUEVO: ROTACIÓN (Giro) ---
+    void HandleRotation()
+    {
+        float turnInput = 0f;
+
+        // 1. Leer Joystick Derecho
+        if (turnAction != null)
+        {
+            Vector2 joystickVal = turnAction.action.ReadValue<Vector2>();
+            turnInput = joystickVal.x; // Solo nos importa izq/der
+        }
+
+        // 2. Soporte Teclado (Q/E o Flechas)
+        if (Mathf.Abs(turnInput) < 0.1f)
+        {
+            if (Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.RightArrow)) turnInput = 1f;
+            if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.LeftArrow)) turnInput = -1f;
+        }
+
+        // 3. Aplicar rotación al personaje
+        if (Mathf.Abs(turnInput) > 0.1f)
+        {
+            transform.Rotate(Vector3.up * turnInput * turnSpeed * Time.deltaTime);
+        }
     }
 
     // --- SALTO ---
