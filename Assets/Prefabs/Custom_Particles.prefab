@@ -4880,7 +4880,7 @@ MonoBehaviour:
   rateHellInteract: 0
   sizeHellInteract: 0
   speedHellInteract: 0
-  soundHell: {fileID: 8300000, guid: 7c6d8277628ad4a48bc2008e0a3c1593, type: 3}
+  soundHell: {fileID: 8300000, guid: 71f68b5436942014f867cdcb088652fb, type: 3}
 --- !u!82 &-6538091558532834248
 AudioSource:
   m_ObjectHideFlags: 0

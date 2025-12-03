@@ -4,47 +4,102 @@ using UnityEngine.InputSystem;
 public class HandMenuClicker : MonoBehaviour
 {
     [Header("Input Settings")]
-    [Tooltip("Assign 'XR Controller (Left Hand) > Optional > menu' here")]
     public InputActionProperty menuButtonAction;
 
-    // Timer to prevent accidental double-clicks
+    // Static flag
+    public static bool isHovering = false;
     private float cooldown = 0f;
+
+    // --- FIX 1: FORCE INPUT TO ENABLE ---
+    // If this is missing, manual bindings often stay "OFF"
+    void OnEnable()
+    {
+        if (menuButtonAction.action != null) menuButtonAction.action.Enable();
+    }
+    void OnDisable()
+    {
+        if (menuButtonAction.action != null) menuButtonAction.action.Disable();
+    }
+    // ------------------------------------
+
+    void Start()
+    {
+        isHovering = false;
+    }
+
+    // --- DEBUG 1: TEST BUTTON PRESS ANYWHERE ---
+    void Update()
+    {
+        // This will print "Button Pressed!" in the console even if you are NOT touching a button.
+        // If you don't see this, your Input Binding is wrong.
+        if (menuButtonAction.action != null && menuButtonAction.action.WasPressedThisFrame())
+        {
+            Debug.Log("TEST: Controller Button was pressed successfully!");
+        }
+    }
+
+    // --- DEBUG 2: TEST TOUCHING ---
+    void OnTriggerEnter(Collider other)
+    {
+        if (IsValidButton(other))
+        {
+            isHovering = true;
+            Debug.Log($"PHYSICS: Hand touched {other.gameObject.name}");
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (IsValidButton(other))
+        {
+            isHovering = false;
+            Debug.Log($"PHYSICS: Hand left {other.gameObject.name}");
+        }
+    }
 
     void OnTriggerStay(Collider other)
     {
-        // 1. Check if the Menu Button is pressed (Value > 0.5)
+        if (!IsValidButton(other)) return;
+
+        isHovering = true;
+
+        // Check Input
         float buttonValue = menuButtonAction.action.ReadValue<float>();
 
+        // Note: Using ReadValue > 0.5 is safer for buttons than WasPressedThisFrame in Stay loops
         if (buttonValue > 0.5f && Time.time > cooldown)
         {
-            // 2. Find the SceneLoader (Your manager that knows how to change scenes)
+            Debug.Log("LOGIC: Touching Button AND Pressing Input -> Executing!");
+
             SceneLoader loader = FindFirstObjectByType<SceneLoader>();
-            
-            if (loader == null) 
+            if (loader == null)
             {
-                Debug.LogError("HandMenuClicker: Could not find SceneLoader in the scene!");
+                Debug.LogError("CRITICAL: SceneLoader not found!");
                 return;
             }
 
-            // 3. Check which button we are touching based on Tag
             if (other.CompareTag("HeavenButton"))
             {
-                Debug.Log("Touched Heaven Button + Clicked Menu!");
                 loader.LoadHeavenMode();
-                cooldown = Time.time + 1.0f; // Wait 1 second before next click
+                cooldown = Time.time + 2.0f;
             }
             else if (other.CompareTag("HellButton"))
             {
-                Debug.Log("Touched Hell Button + Clicked Menu!");
                 loader.LoadHellMode();
-                cooldown = Time.time + 1.0f;
+                cooldown = Time.time + 2.0f;
             }
             else if (other.CompareTag("ReturnButton"))
             {
-                Debug.Log("Touched Return Button + Clicked Menu!");
+                other.gameObject.SetActive(false);
+                isHovering = false;
                 loader.LoadMenu();
-                cooldown = Time.time + 1.0f;
+                cooldown = Time.time + 2.0f;
             }
         }
+    }
+
+    bool IsValidButton(Collider col)
+    {
+        return col.CompareTag("ReturnButton") || col.CompareTag("HeavenButton") || col.CompareTag("HellButton");
     }
 }

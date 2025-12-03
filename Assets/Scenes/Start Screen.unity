@@ -1057,7 +1057,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandMenuClicker
   menuButtonAction:
-    m_UseReference: 1
+    m_UseReference: 0
     m_Action:
       m_Name: Menu Button
       m_Type: 0
@@ -1065,9 +1065,17 @@ MonoBehaviour:
       m_Id: 2c4caa04-689e-4fb2-83c8-4c8382b838f0
       m_Processors: 
       m_Interactions: 
-      m_SingletonActionBindings: []
+      m_SingletonActionBindings:
+      - m_Name: 
+        m_Id: bb979e6f-b1c7-4e6f-983d-669abe31eaab
+        m_Path: <XRInputV1::Oculus::MetaQuestTouchPlusControllerOpenXR>/primarybutton
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: Menu Button
+        m_Flags: 0
       m_Flags: 0
-    m_Reference: {fileID: 4116954447336496447, guid: b6d5c44ebe3244b7692e81ae8265eb22, type: 3}
+    m_Reference: {fileID: -3599823989380923159, guid: b6d5c44ebe3244b7692e81ae8265eb22, type: 3}
 --- !u!114 &934861918
 MonoBehaviour:
   m_ObjectHideFlags: 0
