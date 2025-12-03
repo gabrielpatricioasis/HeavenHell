@@ -463,7 +463,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 396642276}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e676687510f6c4eb0888e6ad7059cdfa, type: 3}
   m_Name: 
@@ -1862,13 +1862,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1828036727}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe102fc6bba7f40aaae85c6865b36c12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuManager
   returnButtonObject: {fileID: 396642276}
-  menuButtonAction: {fileID: 4931515707689756915, guid: 348c7dd6f45c943b29cc6be8817fe0be, type: 3}
 --- !u!4 &1842554587 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 633250420949934588, guid: d5dd74d9e54b29c47934b703f5ef8ea5, type: 3}
