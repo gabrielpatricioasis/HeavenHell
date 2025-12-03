@@ -120,7 +120,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 5
+      scalar: 1
       minScalar: 0.0001
       maxCurve:
         serializedVersion: 2
@@ -4878,7 +4878,7 @@ MonoBehaviour:
   sizeHellIdle: 0.5
   speedHellIdle: 2
   rateHellInteract: 0
-  sizeHellInteract: 0.1
+  sizeHellInteract: 0
   speedHellInteract: 0
   soundHell: {fileID: 8300000, guid: 7c6d8277628ad4a48bc2008e0a3c1593, type: 3}
 --- !u!82 &-6538091558532834248

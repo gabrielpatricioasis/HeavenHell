@@ -1844,9 +1844,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4328358e56bb34c4ab1aa73ea1d181ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
-  currentSpeedMultiplier: 1000
+  currentSpeedMultiplier: 80
   currentGravityMultiplier: 0.5
-  currentJumpForce: 10
+  currentJumpForce: 20
   leftHandCtrl: {fileID: 2065587704}
   rightHandCtrl: {fileID: 1925038276}
   characterController: {fileID: 1828036732}
