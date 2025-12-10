@@ -143,7 +143,7 @@ public class PlayerInteraction : MonoBehaviour
         if (jumpAction != null) jumpPressed = jumpAction.action.WasPerformedThisFrame();
 
         // Soporte Tecla Espacio (PC)
-        if (Input.GetKeyDown(KeyCode.Space)) jumpPressed = true;
+        if (Input.GetKeyDown(KeyCode.J)) jumpPressed = true;
 
         // 3. EJECUTAR SALTO
         if (jumpPressed && characterController.isGrounded)

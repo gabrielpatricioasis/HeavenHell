@@ -12,7 +12,7 @@ public class InteractableMonolith : MonoBehaviour
 
     [Header("Behavior Settings")]
     public float growthScaleFactor = 2.5f; // Tamaño en Heaven
-    public float rubbleScaleFactor = 0.1f; // Tamaño en Hell
+    public float rubbleScaleFactor = 0.0f; // Tamaño en Hell
     public float animationSpeed = 5.0f;
 
     [Header("Effects")]

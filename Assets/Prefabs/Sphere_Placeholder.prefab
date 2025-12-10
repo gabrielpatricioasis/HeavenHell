@@ -158,7 +158,7 @@ MonoBehaviour:
   heavenClip: {fileID: 8300000, guid: 4e52a09dc3f31ec45ae379fb90671ea7, type: 3}
   hellClip: {fileID: 8300000, guid: 05386f4f2ac93d94cacfa70f7a8f6d0d, type: 3}
   growthScaleFactor: 3
-  rubbleScaleFactor: 0.1
+  rubbleScaleFactor: 0
   animationSpeed: 5
   shatterEffectPrefab: {fileID: 2054026474248026324, guid: 5acac129286a643909fd7ed4666db9ea, type: 3}
 --- !u!114 &-4755610356062615356
