@@ -24,12 +24,12 @@ public class InteractableEnergyStream : MonoBehaviour
 
     [Space(10)]
     public float rateHellIdle = 500f;
-    public float sizeHellIdle = 1.0f;
-    public float speedHellIdle = 5.0f;
+    public float sizeHellIdle = 0.85f;
+    public float speedHellIdle = 2.0f;
 
     [Space(10)]
     public float rateHellInteract = 0f;
-    public float sizeHellInteract = 0.1f;
+    public float sizeHellInteract = 0f;
     public float speedHellInteract = 0f;
     public AudioClip soundHell;
 

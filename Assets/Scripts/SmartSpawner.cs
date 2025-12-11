@@ -22,7 +22,7 @@ public class SmartSpawner : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             foreach (Transform child in transform) Destroy(child.gameObject);
             SpawnObjects();

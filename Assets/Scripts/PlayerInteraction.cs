@@ -1,246 +1,186 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    [Header("Current LogInt Parameters")]
-    // Valores por defecto (se sobrescriben al iniciar según el mundo)
-    public float currentSpeedMultiplier = 80.0f;
-    public float currentGravityMultiplier = 0.5f;
-    public float currentJumpForce = 20.0f;
+    [Header("PC Settings")]
+    public float currentSpeedMultiplier = 12.0f;
+    public float currentGravityMultiplier = 1.0f;
+    public float currentJumpForce = 8.0f;
+    public float interactionDistance = 50.0f;
 
-    // --- NUEVO: Velocidad de giro ---
-    public float turnSpeed = 60.0f;
+    [Header("Safety Settings")]
+    public float minDistanceToInteract = 3.0f;
 
-    [Header("VR Component References")]
-    public Transform leftHandCtrl;
-    public Transform rightHandCtrl;
+    [Header("Menu Settings")]
+    public string startSceneName = "Start Screen";
+
+    [Header("References")]
     public CharacterController characterController;
+    public LineRenderer laserLine;
+    public Transform laserOrigin;
 
-    [Header("Input Actions")]
-    public InputActionReference moveAction;        // XRI Left Locomotion/Move
-    public InputActionReference turnAction;        // XRI Right Locomotion/Turn (NUEVO)
-    public InputActionReference jumpAction;        // XRI Right Interaction/Select (Button A)
-    public InputActionReference leftTriggerAction; // XRI Left Interaction/Activate
-    public InputActionReference rightTriggerAction;// XRI Right Interaction/Activate
-
-    [Header("Visuals")]
-    public LineRenderer leftLaser;  // Arrastra el LineRenderer de la mano Izq
-    public LineRenderer rightLaser; // Arrastra el LineRenderer de la mano Der
-
-    // Variables privadas
-    private InteractableEnergyStream currentActiveStream = null;
-    private Vector3 verticalVelocity;
+    private Vector3 verticalVelocity; // Velocidad de caída/salto
+    private WorldManager.WorldState lastKnownState;
 
     void Start()
     {
         if (characterController == null)
             characterController = GetComponent<CharacterController>();
 
-        // Inicializamos los parámetros según el mundo actual
+        if (laserLine != null)
+        {
+            laserLine.positionCount = 2;
+            laserLine.startWidth = 0.02f;
+            laserLine.endWidth = 0.02f;
+            laserLine.material = new Material(Shader.Find("Sprites/Default"));
+            laserLine.material.color = Color.white;
+        }
+
         if (WorldManager.Instance != null)
-            UpdateLogIntParameters(WorldManager.Instance.currentState);
+        {
+            lastKnownState = WorldManager.Instance.currentState;
+            UpdateLogIntParameters(lastKnownState);
+        }
     }
 
     void Update()
     {
-        HandleLocomotion();
-        HandleRotation(); // <--- NUEVO: Función de rotación
-        HandleJump();
-        CheckIfFallen();
+        if (WorldManager.Instance != null && WorldManager.Instance.currentState != lastKnownState)
+        {
+            lastKnownState = WorldManager.Instance.currentState;
+            UpdateLogIntParameters(lastKnownState);
+        }
 
-        // Función unificada para Monolitos y Energía
-        HandleShootingInteraction();
+        HandleMovementAndJump(); // FÍSICAS UNIFICADAS
+        HandleInteractionsAndLaser();
+        CheckRespawn();
+        CheckReturnToMenu();
     }
 
-    // --- CONFIGURACIÓN DE MUNDOS (VELOCIDADES) ---
     public void UpdateLogIntParameters(WorldManager.WorldState newState)
     {
         if (newState == WorldManager.WorldState.Heaven)
         {
-            currentSpeedMultiplier = 80.0f; // MUY RÁPIDO
-            currentGravityMultiplier = 0.5f; // Flotante
-            currentJumpForce = 20.0f;        // Salto alto
+            currentSpeedMultiplier = 40.0f;
+            currentGravityMultiplier = 0.35f;
+            currentJumpForce = 18.0f;
         }
         else
         {
-            currentSpeedMultiplier = 15.0f; // MUY LENTO (Pesado)
-            currentGravityMultiplier = 2.0f; // Gravedad fuerte
-            currentJumpForce = 3.0f;        // Salto apenas perceptible
+            // HELL: Más fuerza para vencer la gravedad pesada
+            currentSpeedMultiplier = 20.0f;
+            currentGravityMultiplier = 3.0f;
+            currentJumpForce = 20.0f; // Subido un poco más para que responda mejor
+        }
+
+        if (laserLine != null)
+        {
+            laserLine.startColor = Color.white;
+            laserLine.endColor = new Color(1, 1, 1, 0.5f);
         }
     }
 
-    // --- MOVIMIENTO ---
-    void HandleLocomotion()
+    // --- AQUÍ ESTÁ EL ARREGLO DEL SALTO ---
+    void HandleMovementAndJump()
     {
-        Vector2 input = Vector2.zero;
-        if (moveAction != null) input = moveAction.action.ReadValue<Vector2>();
+        // 1. Calcular Movimiento Horizontal (WASD)
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+        Vector3 move = transform.right * x + transform.forward * z;
 
-        // Soporte para Teclado (WASD) si no hay mando
-        if (input == Vector2.zero)
+        // 2. Gestionar la Gravedad y el Suelo ANTES de saltar
+        if (characterController.isGrounded)
         {
-            if (Input.GetKey(KeyCode.W)) input.y = 1;
-            if (Input.GetKey(KeyCode.S)) input.y = -1;
-            if (Input.GetKey(KeyCode.A)) input.x = -1;
-            if (Input.GetKey(KeyCode.D)) input.x = 1;
+            // Si estamos en el suelo y cayendo, reseteamos la velocidad a algo pequeño
+            // para mantenernos pegados, pero no acumulamos velocidad infinita.
+            if (verticalVelocity.y < 0)
+            {
+                verticalVelocity.y = -2f;
+            }
+
+            // 3. SALTO (Solo si estamos en el suelo)
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                // La fórmula física mágica
+                verticalVelocity.y = Mathf.Sqrt(currentJumpForce * -2f * (Physics.gravity.y * currentGravityMultiplier));
+            }
         }
 
-        // Fix Turbo (Normalizar si hay input mínimo)
-        if (input.magnitude > 0.1f) input.Normalize();
-
-        // Direcciones planas (Ignorar altura para no frenarse mirando al suelo)
-        Vector3 forwardFlat = transform.forward; forwardFlat.y = 0; forwardFlat.Normalize();
-        Vector3 rightFlat = transform.right; rightFlat.y = 0; rightFlat.Normalize();
-        Vector3 moveDir = rightFlat * input.x + forwardFlat * input.y;
-
-        // MOVIMIENTO REAL (Usamos la variable directa, sin seguros)
-        characterController.Move(moveDir * currentSpeedMultiplier * Time.deltaTime);
-
-        // GRAVEDAD
-        if (characterController.isGrounded && verticalVelocity.y < 0) verticalVelocity.y = -2f;
+        // 4. Aplicar Gravedad (Aumenta la velocidad de caída cada frame)
         verticalVelocity.y += Physics.gravity.y * currentGravityMultiplier * Time.deltaTime;
-        characterController.Move(verticalVelocity * Time.deltaTime);
+
+        // 5. MOVIMIENTO FINAL (UNIFICADO)
+        // Movemos el personaje una sola vez sumando (Horizontal * Velocidad) + (Vertical)
+        Vector3 finalMovement = (move * currentSpeedMultiplier) + verticalVelocity;
+
+        characterController.Move(finalMovement * Time.deltaTime);
     }
 
-    // --- NUEVO: ROTACIÓN (Giro) ---
-    void HandleRotation()
+    void HandleInteractionsAndLaser()
     {
-        float turnInput = 0f;
-
-        // 1. Leer Joystick Derecho
-        if (turnAction != null)
-        {
-            Vector2 joystickVal = turnAction.action.ReadValue<Vector2>();
-            turnInput = joystickVal.x; // Solo nos importa izq/der
-        }
-
-        // 2. Soporte Teclado (Q/E o Flechas)
-        if (Mathf.Abs(turnInput) < 0.1f)
-        {
-            if (Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.RightArrow)) turnInput = 1f;
-            if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.LeftArrow)) turnInput = -1f;
-        }
-
-        // 3. Aplicar rotación al personaje
-        if (Mathf.Abs(turnInput) > 0.1f)
-        {
-            transform.Rotate(Vector3.up * turnInput * turnSpeed * Time.deltaTime);
-        }
-    }
-
-    // --- SALTO ---
-    void HandleJump()
-    {
-        // 1. SEGURIDAD: ¿Estás disparando con el gatillo derecho?
-        float triggerValue = 0f;
-        if (rightTriggerAction != null) triggerValue = rightTriggerAction.action.ReadValue<float>();
-
-        // BLOQUEO: Si aprietas gatillo, PROHIBIDO SALTAR
-        if (triggerValue > 0.1f) return;
-
-        // 2. DETECTAR SALTO (Botón A / Grip)
-        bool jumpPressed = false;
-        if (jumpAction != null) jumpPressed = jumpAction.action.WasPerformedThisFrame();
-
-        // Soporte Tecla Espacio (PC)
-        if (Input.GetKeyDown(KeyCode.J)) jumpPressed = true;
-
-        // 3. EJECUTAR SALTO
-        if (jumpPressed && characterController.isGrounded)
-        {
-            // Usamos la fuerza configurada en UpdateLogIntParameters
-            verticalVelocity.y = Mathf.Sqrt(currentJumpForce * -2f * (Physics.gravity.y * currentGravityMultiplier));
-        }
-    }
-
-    // --- DISPARO Y LÁSER (Monolitos + Energía) ---
-    void HandleShootingInteraction()
-    {
-        // Leemos los Triggers
-        float leftValue = (leftTriggerAction != null) ? leftTriggerAction.action.ReadValue<float>() : 0;
-        float rightValue = (rightTriggerAction != null) ? rightTriggerAction.action.ReadValue<float>() : 0;
-
-        // Teclas de PC (T o P disparan)
-        bool pcShoot = Input.GetKey(KeyCode.T) || Input.GetKey(KeyCode.P);
-
-        // MANO IZQUIERDA
-        if (leftValue > 0.1f)
-        {
-            FireRay(leftHandCtrl, leftLaser);
-        }
-        else if (leftLaser != null) leftLaser.enabled = false;
-
-        // MANO DERECHA
-        if (rightValue > 0.1f)
-        {
-            FireRay(rightHandCtrl, rightLaser);
-        }
-        else if (rightLaser != null) rightLaser.enabled = false;
-
-        // MODO PC (Cámara)
-        if (pcShoot)
-        {
-            FireRay(Camera.main.transform, null);
-        }
-
-        // SOLTAR ENERGY STREAM (Si no se aprieta nada)
-        if (leftValue <= 0.1f && rightValue <= 0.1f && !pcShoot && currentActiveStream != null)
-        {
-            currentActiveStream.StopTriggerHold();
-            currentActiveStream = null;
-        }
-    }
-
-    // Lógica del Raycast
-    void FireRay(Transform origin, LineRenderer laser)
-    {
-        // DISTANCIA AUMENTADA A 500 METROS
-        float maxDist = 500f;
-
-        // Dibujar Láser
-        if (laser != null)
-        {
-            laser.enabled = true;
-            laser.SetPosition(0, origin.position);
-            laser.SetPosition(1, origin.position + origin.forward * maxDist);
-        }
-
+        Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
-        if (Physics.Raycast(origin.position, origin.forward, out hit, maxDist))
+        Vector3 targetPoint;
+
+        if (Physics.Raycast(ray, out hit, interactionDistance))
         {
-            // Cortar láser visual donde choque
-            if (laser != null) laser.SetPosition(1, hit.point);
+            targetPoint = hit.point - (ray.direction * 0.2f);
+            float distanceToObject = hit.distance;
 
-            // 1. MONOLITOS (Crecer/Explotar)
-            InteractableMonolith monolith = hit.collider.GetComponent<InteractableMonolith>();
-            if (monolith != null)
+            if (Input.GetMouseButtonDown(0))
             {
-                monolith.ReceivePush();
-            }
-
-            // 2. ENERGY STREAMS (Activar sonido/partículas)
-            InteractableEnergyStream stream = hit.collider.GetComponent<InteractableEnergyStream>();
-            if (stream != null)
-            {
-                if (currentActiveStream != stream)
+                if (distanceToObject > minDistanceToInteract)
                 {
-                    if (currentActiveStream != null) currentActiveStream.StopTriggerHold();
-                    currentActiveStream = stream;
+                    var monolith = hit.collider.GetComponent<InteractableMonolith>();
+                    if (monolith != null) monolith.ReceivePush();
                 }
-                currentActiveStream.StartTriggerHold();
             }
+
+            if (Input.GetMouseButton(1))
+            {
+                var stream = hit.collider.GetComponent<InteractableEnergyStream>();
+                if (stream != null) stream.StartTriggerHold();
+            }
+        }
+        else
+        {
+            targetPoint = ray.origin + ray.direction * interactionDistance;
+        }
+
+        if (laserLine != null && laserOrigin != null)
+        {
+            laserLine.SetPosition(0, laserOrigin.position);
+            laserLine.SetPosition(1, targetPoint);
+        }
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            var allStreams = FindObjectsByType<InteractableEnergyStream>(FindObjectsSortMode.None);
+            foreach (var s in allStreams) s.StopTriggerHold();
         }
     }
 
-    // --- SEGURIDAD: RESPAWN SI CAES ---
-    void CheckIfFallen()
+    void CheckRespawn()
     {
-        if (transform.position.y < -10f)
+        if (transform.position.y < -10)
         {
             characterController.enabled = false;
-            transform.position = new Vector3(0, 2, 0); // Vuelta al centro
-            verticalVelocity = Vector3.zero;
+            transform.position = new Vector3(0, 2, 0);
             characterController.enabled = true;
+            verticalVelocity = Vector3.zero; // Importante resetear la caída al renacer
+        }
+    }
+
+    void CheckReturnToMenu()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            if (WorldManager.Instance != null) Destroy(WorldManager.Instance.gameObject);
+            if (GameManager.Instance != null) Destroy(GameManager.Instance.gameObject);
+            SceneManager.LoadScene(startSceneName);
         }
     }
 }

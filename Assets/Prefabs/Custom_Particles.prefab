@@ -4875,7 +4875,7 @@ MonoBehaviour:
   soundHeaven: {fileID: 8300000, guid: e76fd521e3e5efa4fad14c1eb42b0308, type: 3}
   colorHell: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   rateHellIdle: 500
-  sizeHellIdle: 0.5
+  sizeHellIdle: 0.85
   speedHellIdle: 2
   rateHellInteract: 0
   sizeHellInteract: 0
@@ -4938,7 +4938,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
