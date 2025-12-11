@@ -12,7 +12,7 @@ A dual experience exploring the contrast between Creation (Heaven) and Corruptio
 
 ## 🎮 VR Controls (Original)
 
-The primary way to experience the project using a VR Headset.
+The primary way to experience the project is using a PC-connected VR Headset via Unity (PCVR).
 
 - **Select World (Start Screen):** X Button (Left Controller).
 - **Return to Main Menu:** Left Grip (Side Button).
