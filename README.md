@@ -32,7 +32,15 @@ You can play the non-VR version directly on your computer without a headset.
 1. Download the `.zip` file for your platform (Windows or Mac).
 2. **Unzip/Extract** the folder completely (Important!).
 3. **Windows:** Open the folder and double-click `HeavenHell.exe`.
-4. **Mac:** Open the folder and run the `HeavenHell.app` file (You may need to allow the app in Security settings).
+4. **Mac:** Open the folder and run the `Build_Mac.app` file.
+
+> **⚠️ Note for Mac Users:**
+> If you see an error saying *"The application can't be opened"* or *"Unidentified Developer"*:
+> 1. Open **Terminal**.
+> 2. Type `chmod +x ` (with a space at the end).
+> 3. Drag the `.app` file into the terminal window.
+> 4. Add `/Contents/MacOS/*` to the end of the line and press **Enter**.
+> 5. If prompted about security, **Right-Click** the app and select **Open**.
 
 ### 🖥️ PC Desktop Controls
 | Action | Input |
