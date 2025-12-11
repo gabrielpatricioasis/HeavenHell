@@ -5,7 +5,7 @@
 A dual experience exploring the contrast between Creation (Heaven) and Corruption (Hell) through reactive physics and audiovisual changes.
 
 > **Now available in two versions:**
-> 1. **VR Experience:** Immersive Virtual Reality (Quest/SteamVR).
+> 1. **VR Experience:** Immersive Virtual Reality (Meta Quest 3).
 > 2. **Desktop Version:** Playable on PC/Mac/Linux with Mouse & Keyboard.
 
 ---
